@@ -79,9 +79,25 @@ jobs:
     needs: Compilation
     steps:
       - uses: actions/checkout@v4
-      - run: cmake -S . -B build
-      - run: cmake --build build
-      - run: ./build/src/calculator car 5
+  
+      - name: Build
+        run: |
+          cmake -S . -B build
+          cmake --build build
+  
+      - name: Run test "car" and capture report
+        run: |
+          cd build
+          echo "== Test car 5 ==" > report_car.txt
+          ./src/calculator car 5 | tee -a report_car.txt
+          echo "Exit code: $?" >> report_car.txt
+  
+      - name: Upload report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapport-test-car
+          path: build/report_car.txt
+
 
   Deploy:
     runs-on: ubuntu-latest
